@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alura.foroAlura.dto.DatosLogin;
+import com.alura.foroAlura.dto.DatosToken;
+import com.alura.foroAlura.model.Usuario;
+import com.alura.foroAlura.security.TokenService;
 
 @RestController
 @RequestMapping("/login")
@@ -22,11 +25,16 @@ public class AutenticacionController {
 	@Autowired
 	AuthenticationManager authenticationManager;
 	
+	@Autowired
+	TokenService tokenService;
+	
 	@PostMapping
 	public ResponseEntity<?> login(@RequestBody DatosLogin datosLogin){
+		String token = null;
 		Authentication auth = new UsernamePasswordAuthenticationToken(datosLogin.email(), 
-				datosLogin.password(), null);
+				datosLogin.password());
 		authenticationManager.authenticate(auth);
-		return ResponseEntity.ok(auth.getPrincipal());
+		token = tokenService.createJWT((String)auth.getPrincipal());
+		return ResponseEntity.ok(new DatosToken(token));
 	}
 }
